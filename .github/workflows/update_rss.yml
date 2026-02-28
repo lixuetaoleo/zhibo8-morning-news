@@ -1,0 +1,38 @@
+name: Update Zhibo8 RSS
+
+on:
+  schedule:
+    - cron: '0 23 * * *'
+  # 允许手动在 GitHub 网页上点击运行测试
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # 赋予 GitHub Actions 写入仓库的权限
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # 使用较新的 Node 版本
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run script
+        run: node index.js
+
+      - name: Commit and push if changed
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git add football_morning_news.xml
+          # 如果文件有变化才 commit
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto update RSS feed" && git push)

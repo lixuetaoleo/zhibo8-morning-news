@@ -1,0 +1,12 @@
+{
+  "name": "zhibo8-morning-news",
+  "version": "1.0.0",
+  "description": "Zhibo8 Morning News RSS",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "axios": "^1.6.0",
+    "dayjs": "^1.11.10",
+    "jsdom": "^22.1.0"
+  }
+}

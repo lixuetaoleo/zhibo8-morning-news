@@ -2,7 +2,7 @@ name: Update Zhibo8 RSS
 
 on:
   schedule:
-    - cron: '0 23 * * *'
+    - cron: '30 23 * * *'
   # 允许手动在 GitHub 网页上点击运行测试
   workflow_dispatch:
 

@@ -13,7 +13,7 @@ const MAX_ITEMS = 50; // 【优化】只保留最近 50 条，防止文件无限
 // --- 工具函数 ---
 
 function getDateStr() {
-  return dayjs().format('YYYY-MM-DD');
+  return dayjs().add(1, 'day').format('YYYY-MM-DD');
 }
 
 // 生成单个 item 的 XML 字符串

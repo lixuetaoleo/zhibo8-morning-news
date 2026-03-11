@@ -2,6 +2,12 @@ const axios = require('axios');
 const jsdom = require('jsdom');
 const fs = require('fs');
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
+
+// 引入 timezone 和 utc 插件
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 const { JSDOM } = jsdom;
 
@@ -13,7 +19,8 @@ const MAX_ITEMS = 50; // 【优化】只保留最近 50 条，防止文件无限
 // --- 工具函数 ---
 
 function getDateStr() {
-  return dayjs().add(1, 'day').format('YYYY-MM-DD');
+  // 强制使用东八区（北京时间），无论在本地还是 GitHub Actions 触发都能获取正确的当前日期
+  return dayjs().tz('Asia/Shanghai').format('YYYY-MM-DD');
 }
 
 // 生成单个 item 的 XML 字符串
@@ -51,7 +58,7 @@ function updateRSSFile(newItemXml) {
   if (fs.existsSync(RSS_FILE_PATH)) {
     const fileContent = fs.readFileSync(RSS_FILE_PATH, 'utf8');
     // 【优化】使用非贪婪匹配 (.*?) 获取独立的 item 数组
-    existingItems = fileContent.match(/<item>[\s\S]*?<\/item>/g) || [];
+    existingItems = fileContent.match(/<item>[\\s\\S]*?<\/item>/g) || [];
   }
 
   // 将新条目插入到数组最前面

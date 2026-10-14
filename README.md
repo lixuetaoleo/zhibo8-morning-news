@@ -1,17 +1,19 @@
 # 直播吧足球 RSS
 
-把[直播吧资讯页面](https://m.zhibo8.com/news.htm)的足球「最新资讯」生成 RSS 2.0，通过 GitHub Actions 更新，使用仓库原始文件链接订阅。原有足球早报继续保留。
+提供直播吧足球早报全文 RSS，通过 GitHub Actions 自动更新，使用仓库原始文件链接订阅。最新资讯自动更新任务已取消，现有文件保留为历史快照。
 
 ## 订阅
 
 | RSS | 订阅地址 | 更新方式 |
 | --- | --- | --- |
-| 足球最新资讯 | [football_latest.xml](https://raw.githubusercontent.com/lixuetaoleo/zhibo8-morning-news/main/football_latest.xml) | 计划每 15 分钟更新 |
+| 足球最新资讯 | [football_latest.xml](https://raw.githubusercontent.com/lixuetaoleo/zhibo8-morning-news/main/football_latest.xml) | 已停止自动更新，仅保留历史快照 |
 | 足球早报 | [football_morning_news.xml](https://raw.githubusercontent.com/lixuetaoleo/zhibo8-morning-news/main/football_morning_news.xml) | 北京时间 07:11 至 12:41，每半小时检查 |
 
-把对应链接复制到 RSS 阅读器即可。两个源分别由 [latest.js](latest.js) 和 [index.js](index.js) 生成，工作流见 [最新资讯任务](.github/workflows/update_latest_rss.yml)和[早报任务](.github/workflows/update_rss.yml)。
+把早报链接复制到 RSS 阅读器即可。[index.js](index.js) 生成早报，自动更新配置见 [早报任务](.github/workflows/update_rss.yml)。
 
-## 最新资讯的范围
+## 最新资讯历史快照
+
+最新资讯的 GitHub Actions 工作流已移除。[latest.js](latest.js) 与现有 XML 保留，以下为手动生成时的行为。
 
 - 请求携带 `Cookie: stype=football`，再显式筛选 `#news_new li[type="zuqiu"]`。返回的 HTML 仍包含其他类型，上游在[页面脚本](https://m.zhibo8.com/v2/js/action_v2.js?v=1.5)中按类型筛选。
 - 收录当前页面「最新资讯」的全部足球条目，保持页面顺序和置顶位置，使用文章 URL 作为稳定 GUID。跨日后的条目范围随页面变化，历史条目由阅读器保存。
@@ -27,9 +29,9 @@
 
 ## GitHub 自动更新
 
-[最新资讯工作流](.github/workflows/update_latest_rss.yml)按 UTC 每小时第 7、22、37、52 分钟运行，也支持在仓库 **Actions → Update Zhibo8 Football Latest RSS → Run workflow** 手动触发。`main` 分支相关脚本、测试、依赖或该工作流发生变化时也会运行。任务通过仓库自带的 `GITHUB_TOKEN` 提交 XML，无需额外密钥。[GitHub Token 权限说明](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication)
+[早报工作流](.github/workflows/update_rss.yml)按 UTC `11,41 0-4,23 * * *` 运行，对应北京时间 07:11 至 12:41，每半小时一次。可在 **Actions → Update Zhibo8 RSS → Run workflow** 手动触发，`main` 分支早报脚本、测试或工作流发生变化时也会运行。早报任务仅提交自己的 XML，推送前会同步分支，最多重试 3 次。
 
-[早报工作流](.github/workflows/update_rss.yml)按 UTC `11,41 0-4,23 * * *` 运行，对应北京时间 07:11 至 12:41，每半小时一次。可在 **Actions → Update Zhibo8 RSS → Run workflow** 手动触发，`main` 分支早报脚本、测试或工作流发生变化时也会运行。早报任务仅提交自己的 XML，与最新资讯任务同时更新仓库时会先同步分支，最多重试 3 次。
+任务通过仓库自带的 `GITHUB_TOKEN` 提交 XML，无需额外密钥。[GitHub Token 权限说明](https://docs.github.com/en/actions/security-for-github-actions/security-guides/automatic-token-authentication)
 
 GitHub 定时任务可能延迟，负载高时也可能跳过。定时任务只在默认分支运行，公开仓库连续 60 天没有活动时会自动停用。[GitHub 官方调度说明](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule)
 
@@ -39,17 +41,17 @@ GitHub 定时任务可能延迟，负载高时也可能跳过。定时任务只�
 
 ```sh
 npm ci
-node --test tests/latest.test.js
-node latest.js
-```
-
-生成文件为仓库根目录的 `football_latest.xml`。可通过 `FEED_URL` 设置 RSS 自身的订阅地址，GitHub 工作流会自动使用当前仓库和默认分支的 raw 链接。入口与配置见 [latest.js](latest.js)。
-
-生成足球早报：
-
-```sh
 node --test tests/morning.test.js
 node index.js
 ```
 
-生成文件为 `football_morning_news.xml`，同样支持通过 `FEED_URL` 设置自身的订阅地址。入口与配置见 [index.js](index.js)。
+生成文件为仓库根目录的 `football_morning_news.xml`。可通过 `FEED_URL` 设置 RSS 自身的订阅地址，GitHub 工作流会自动使用当前仓库和默认分支的 raw 链接。入口与配置见 [index.js](index.js)。
+
+如需手动生成最新资讯快照：
+
+```sh
+node --test tests/latest.test.js
+node latest.js
+```
+
+生成文件为 `football_latest.xml`。这个脚本不会被 GitHub Actions 自动执行。
